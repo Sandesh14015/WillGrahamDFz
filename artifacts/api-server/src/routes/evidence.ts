@@ -238,7 +238,6 @@ router.post("/evidence/:evidenceId/analyze", async (req, res): Promise<void> => 
     await db.insert(findingsTable).values(newFindings);
   }
 
-  await db.upsert ? null : null;
   const [existing] = await db.select().from(analysisTable).where(eq(analysisTable.evidenceId, params.data.evidenceId));
   if (existing) {
     await db.update(analysisTable).set({ status: "complete", fileMetadata, strings: stringsResult, documentMeta, imageMeta, emailMeta }).where(eq(analysisTable.evidenceId, params.data.evidenceId));

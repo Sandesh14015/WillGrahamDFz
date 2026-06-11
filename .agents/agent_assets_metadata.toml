@@ -1,0 +1,14 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "xhXIpfZ3f3PODnbTDHoQD"
+uri = "file://forensix-project.tar.gz"
+type = "unspecified"
+title = "ForensiX — Full Project Download"
+
+[[outputs]]
+id = "k_H52XBU0AehqVGCcIRcO"
+uri = "file://forensix-github.tar.gz"
+type = "unspecified"
+title = "ForensiX — GitHub Ready (tar.gz)"

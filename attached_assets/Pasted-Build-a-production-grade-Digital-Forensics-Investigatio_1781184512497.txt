@@ -1,0 +1,377 @@
+Build a production-grade Digital Forensics Investigation Platform called ForensiX.
+
+The application must work both as:
+
+A Linux/Windows command-line tool (CLI)
+A Web-based investigation dashboard
+
+Both interfaces must use the same shared backend modules.
+
+Core Goal
+
+ForensiX is a digital forensics and incident investigation platform that allows investigators to collect, analyze, correlate, and report digital evidence from files, logs, devices, emails, metadata, and disk images while maintaining forensic integrity.
+
+The system should be modular, extensible, and suitable for cybersecurity investigations.
+
+Architecture
+forensix/
+│
+├── core/
+│   ├── acquisition/
+│   ├── hashing/
+│   ├── metadata/
+│   ├── timeline/
+│   ├── email/
+│   ├── documents/
+│   ├── media/
+│   ├── yara/
+│   ├── reporting/
+│   └── utils/
+│
+├── cli/
+│   └── main.py
+│
+├── web/
+│   ├── app.py
+│   ├── templates/
+│   ├── static/
+│   └── api/
+│
+├── reports/
+├── evidence/
+├── cases/
+├── requirements.txt
+└── README.md
+Forensic Principles
+
+The system must always:
+
+Work on copies of evidence
+Never modify original evidence
+Generate SHA256 hashes for integrity
+Maintain chain-of-custody logs
+Log every forensic action
+Timestamp all operations
+Be reproducible
+Features
+1. Evidence Acquisition
+
+Collect and preserve evidence.
+
+Capabilities:
+
+Create forensic copies
+Generate SHA256 hashes
+Verify integrity
+Evidence manifest creation
+Chain-of-custody records
+
+CLI Example:
+
+forensix acquire suspicious.pdf
+2. Hash Analysis
+
+Capabilities:
+
+MD5
+SHA1
+SHA256
+
+Features:
+
+Verify hashes
+Compare files
+Detect duplicates
+Hash database lookup support
+
+CLI Example:
+
+forensix hash file.exe
+3. File Metadata Analysis
+
+Extract:
+
+Created time
+Modified time
+Access time
+File size
+Owner
+Permissions
+
+Supported formats:
+
+Any file
+Documents
+Images
+Audio
+Video
+
+CLI Example:
+
+forensix metadata evidence/
+4. Document Forensics
+
+Supported:
+
+DOCX
+PDF
+TXT
+
+Extract:
+
+Author
+Creation dates
+Embedded links
+Hidden metadata
+Suspicious indicators
+
+Libraries:
+
+pypdf
+python-docx
+oletools
+5. Image Forensics
+
+Supported:
+
+JPG
+PNG
+TIFF
+
+Extract:
+
+EXIF
+GPS
+Camera information
+Editing history indicators
+
+Libraries:
+
+ExifTool
+Pillow
+6. Audio & Video Forensics
+
+Extract:
+
+Metadata
+Recording dates
+Codec information
+Duration
+Device information
+
+Libraries:
+
+mutagen
+hachoir
+7. Email Forensics
+
+Supported:
+
+EML
+MBOX
+
+Extract:
+
+Headers
+Sender
+Receiver
+Attachments
+DKIM
+SPF indicators
+Received chain
+
+Libraries:
+
+mail-parser
+dkimpy
+8. String Extraction
+
+Capabilities:
+
+Extract printable strings
+URLs
+IP addresses
+Domains
+Email addresses
+
+CLI Example:
+
+forensix strings malware.exe
+9. Timeline Analysis
+
+Build forensic timelines using:
+
+File timestamps
+Email timestamps
+Metadata timestamps
+Event logs
+
+Output:
+
+Chronological timeline
+JSON
+CSV
+
+Libraries:
+
+plaso integration
+Custom timeline engine
+
+CLI Example:
+
+forensix timeline evidence/
+10. YARA Malware Detection
+
+Capabilities:
+
+Scan files using YARA
+Detect IOCs
+Custom rule support
+Community rule support
+
+Libraries:
+
+yara-python
+
+CLI Example:
+
+forensix yara evidence/
+11. Disk Image Investigation
+
+Supported:
+
+E01
+RAW
+DD
+
+Capabilities:
+
+Mount images
+Browse filesystems
+Recover deleted files
+Analyze partitions
+
+Libraries:
+
+pytsk3
+pyewf
+
+CLI Example:
+
+forensix image disk.E01
+12. Search Engine
+
+Search by:
+
+Filename
+Hash
+Content
+Metadata
+Extension
+
+CLI Example:
+
+forensix search evidence --keyword password
+13. Case Management
+
+Capabilities:
+
+Create cases
+Store evidence
+Track investigators
+Maintain notes
+Evidence tagging
+
+Structure:
+
+cases/
+ ├── Case-001/
+ ├── Case-002/
+14. Reporting Engine
+
+Generate:
+
+JSON reports
+PDF reports
+HTML reports
+
+Report must contain:
+
+Evidence summary
+Findings
+Timeline
+Hashes
+Chain of custody
+Web Dashboard
+
+Build a professional dark-themed dashboard.
+
+Pages:
+
+Dashboard
+Recent cases
+Recent evidence
+Statistics
+Case Management
+Create case
+Open case
+Add evidence
+Evidence Explorer
+Browse uploaded evidence
+Metadata viewer
+Timeline Viewer
+Interactive timeline
+YARA Scanner
+Upload and scan files
+Reports
+Generate and download reports
+CLI Commands
+forensix acquire
+forensix hash
+forensix metadata
+forensix strings
+forensix timeline
+forensix yara
+forensix image
+forensix search
+forensix report
+forensix case
+Reliability Requirements
+
+Use:
+
+Docker
+Virtual environments
+Pinned dependency versions
+Error handling
+Logging
+Unit tests
+
+Avoid:
+
+Modifying original evidence
+Crashing on malformed files
+Dependency version conflicts
+Future AI Features
+
+Design architecture so these can be added later:
+
+AI-generated forensic summaries
+IOC correlation
+Threat intelligence enrichment
+Malware classification
+Investigation assistant chatbot
+Automated anomaly detection
+
+Generate the complete project with:
+
+Modular architecture
+Clean code
+Flask backend
+Responsive frontend
+CLI support
+Docker support
+Documentation
+Installation guide
+Sample forensic datasets
+Sample reports

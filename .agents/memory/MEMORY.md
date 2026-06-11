@@ -1,0 +1,1 @@
+- [ForensiX stack & conventions](forensix-conventions.md) — file upload uses fetch/FormData directly (not codegen hook); queryKey required in all query options

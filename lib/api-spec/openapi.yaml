@@ -1,0 +1,832 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: ForensiX Digital Forensics Investigation Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: cases
+    description: Case management
+  - name: evidence
+    description: Evidence management and analysis
+  - name: timeline
+    description: Timeline analysis
+  - name: yara
+    description: YARA pattern scanning
+  - name: reports
+    description: Report generation
+  - name: stats
+    description: Dashboard statistics
+  - name: search
+    description: Search operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /stats:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /cases:
+    get:
+      operationId: listCases
+      tags: [cases]
+      summary: List all cases
+      responses:
+        "200":
+          description: List of cases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Case"
+    post:
+      operationId: createCase
+      tags: [cases]
+      summary: Create a new case
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaseInput"
+      responses:
+        "201":
+          description: Case created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+
+  /cases/{caseId}:
+    get:
+      operationId: getCase
+      tags: [cases]
+      summary: Get a case by ID
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Case details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+        "404":
+          description: Case not found
+    patch:
+      operationId: updateCase
+      tags: [cases]
+      summary: Update a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CaseUpdate"
+      responses:
+        "200":
+          description: Case updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Case"
+        "404":
+          description: Case not found
+    delete:
+      operationId: deleteCase
+      tags: [cases]
+      summary: Delete a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Case deleted
+        "404":
+          description: Case not found
+
+  /cases/{caseId}/evidence:
+    get:
+      operationId: listCaseEvidence
+      tags: [evidence]
+      summary: List evidence for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of evidence
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evidence"
+    post:
+      operationId: uploadEvidence
+      tags: [evidence]
+      summary: Upload evidence file for a case (multipart/form-data with field 'file')
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Evidence uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evidence"
+        "404":
+          description: Case not found
+
+  /cases/{caseId}/timeline:
+    get:
+      operationId: getCaseTimeline
+      tags: [timeline]
+      summary: Get forensic timeline for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Timeline events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimelineEvent"
+
+  /cases/{caseId}/report:
+    post:
+      operationId: generateReport
+      tags: [reports]
+      summary: Generate a forensic report for a case
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "200":
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "404":
+          description: Case not found
+
+  /evidence/{evidenceId}:
+    get:
+      operationId: getEvidence
+      tags: [evidence]
+      summary: Get evidence by ID
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Evidence details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evidence"
+        "404":
+          description: Evidence not found
+    delete:
+      operationId: deleteEvidence
+      tags: [evidence]
+      summary: Delete evidence
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Evidence deleted
+        "404":
+          description: Evidence not found
+
+  /evidence/{evidenceId}/analyze:
+    post:
+      operationId: analyzeEvidence
+      tags: [evidence]
+      summary: Trigger analysis of an evidence file
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Analysis results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "404":
+          description: Evidence not found
+
+  /evidence/{evidenceId}/analysis:
+    get:
+      operationId: getEvidenceAnalysis
+      tags: [evidence]
+      summary: Get analysis results for evidence
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Analysis results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+        "404":
+          description: Evidence not found
+
+  /evidence/{evidenceId}/custody:
+    get:
+      operationId: getChainOfCustody
+      tags: [evidence]
+      summary: Get chain of custody for evidence
+      parameters:
+        - name: evidenceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Chain of custody records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustodyRecord"
+
+  /yara/scan:
+    post:
+      operationId: yaraPatternScan
+      tags: [yara]
+      summary: Scan evidence using YARA-like pattern rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/YaraScanInput"
+      responses:
+        "200":
+          description: Scan results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/YaraScanResult"
+
+  /search:
+    get:
+      operationId: searchForensic
+      tags: [search]
+      summary: Search cases, evidence, and findings
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [all, cases, evidence, findings]
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    DashboardStats:
+      type: object
+      required: [totalCases, activeCases, totalEvidence, analyzedEvidence, recentActivity, evidenceByType, casesByStatus]
+      properties:
+        totalCases:
+          type: integer
+        activeCases:
+          type: integer
+        totalEvidence:
+          type: integer
+        analyzedEvidence:
+          type: integer
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+        evidenceByType:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeCount"
+        casesByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+
+    ActivityItem:
+      type: object
+      required: [id, description, timestamp, type]
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        timestamp:
+          type: string
+        type:
+          type: string
+
+    TypeCount:
+      type: object
+      required: [type, count]
+      properties:
+        type:
+          type: string
+        count:
+          type: integer
+
+    StatusCount:
+      type: object
+      required: [status, count]
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+
+    Case:
+      type: object
+      required: [id, caseNumber, name, status, investigator, createdAt, updatedAt, evidenceCount]
+      properties:
+        id:
+          type: integer
+        caseNumber:
+          type: string
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [open, active, closed, archived]
+        priority:
+          type: ["string", "null"]
+          enum: [low, medium, high, critical, null]
+        investigator:
+          type: string
+        tags:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        evidenceCount:
+          type: integer
+
+    CaseInput:
+      type: object
+      required: [name, investigator]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        investigator:
+          type: string
+          minLength: 1
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        tags:
+          type: string
+
+    CaseUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          type: string
+          enum: [open, active, closed, archived]
+        investigator:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        tags:
+          type: string
+
+    Evidence:
+      type: object
+      required: [id, caseId, originalName, storedName, mimeType, fileSize, sha256, md5, sha1, analysisStatus, uploadedAt]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        originalName:
+          type: string
+        storedName:
+          type: string
+        mimeType:
+          type: string
+        fileSize:
+          type: integer
+        sha256:
+          type: string
+        md5:
+          type: string
+        sha1:
+          type: string
+        analysisStatus:
+          type: string
+          enum: [pending, analyzing, complete, failed]
+        notes:
+          type: ["string", "null"]
+        uploadedAt:
+          type: string
+
+    AnalysisResult:
+      type: object
+      required: [evidenceId, status]
+      properties:
+        evidenceId:
+          type: integer
+        status:
+          type: string
+        fileMetadata:
+          $ref: "#/components/schemas/FileMetadata"
+        strings:
+          $ref: "#/components/schemas/ExtractedStrings"
+        documentMeta:
+          $ref: "#/components/schemas/DocumentMeta"
+        imageMeta:
+          $ref: "#/components/schemas/ImageMeta"
+        emailMeta:
+          $ref: "#/components/schemas/EmailMeta"
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Finding"
+
+    FileMetadata:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+        mimeType:
+          type: string
+        created:
+          type: ["string", "null"]
+        modified:
+          type: ["string", "null"]
+        accessed:
+          type: ["string", "null"]
+        sha256:
+          type: string
+        md5:
+          type: string
+        sha1:
+          type: string
+
+    ExtractedStrings:
+      type: object
+      properties:
+        urls:
+          type: array
+          items:
+            type: string
+        ipAddresses:
+          type: array
+          items:
+            type: string
+        emailAddresses:
+          type: array
+          items:
+            type: string
+        domains:
+          type: array
+          items:
+            type: string
+        printableStrings:
+          type: array
+          items:
+            type: string
+
+    DocumentMeta:
+      type: object
+      properties:
+        author:
+          type: ["string", "null"]
+        title:
+          type: ["string", "null"]
+        subject:
+          type: ["string", "null"]
+        creator:
+          type: ["string", "null"]
+        producer:
+          type: ["string", "null"]
+        creationDate:
+          type: ["string", "null"]
+        modDate:
+          type: ["string", "null"]
+        pageCount:
+          type: ["integer", "null"]
+        wordCount:
+          type: ["integer", "null"]
+
+    ImageMeta:
+      type: object
+      properties:
+        make:
+          type: ["string", "null"]
+        model:
+          type: ["string", "null"]
+        software:
+          type: ["string", "null"]
+        dateTime:
+          type: ["string", "null"]
+        gpsLatitude:
+          type: ["number", "null"]
+        gpsLongitude:
+          type: ["number", "null"]
+        width:
+          type: ["integer", "null"]
+        height:
+          type: ["integer", "null"]
+        colorSpace:
+          type: ["string", "null"]
+
+    EmailMeta:
+      type: object
+      properties:
+        from:
+          type: ["string", "null"]
+        to:
+          type: ["string", "null"]
+        subject:
+          type: ["string", "null"]
+        date:
+          type: ["string", "null"]
+        messageId:
+          type: ["string", "null"]
+        receivedChain:
+          type: array
+          items:
+            type: string
+        hasAttachments:
+          type: boolean
+        attachmentNames:
+          type: array
+          items:
+            type: string
+
+    Finding:
+      type: object
+      required: [id, evidenceId, severity, description, indicatorType, value, createdAt]
+      properties:
+        id:
+          type: integer
+        evidenceId:
+          type: integer
+        caseId:
+          type: integer
+        severity:
+          type: string
+          enum: [info, low, medium, high, critical]
+        description:
+          type: string
+        indicatorType:
+          type: string
+        value:
+          type: string
+        createdAt:
+          type: string
+
+    TimelineEvent:
+      type: object
+      required: [id, caseId, timestamp, eventType, description, source]
+      properties:
+        id:
+          type: integer
+        caseId:
+          type: integer
+        evidenceId:
+          type: ["integer", "null"]
+        evidenceName:
+          type: ["string", "null"]
+        timestamp:
+          type: string
+        eventType:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+
+    CustodyRecord:
+      type: object
+      required: [id, evidenceId, action, actor, timestamp]
+      properties:
+        id:
+          type: integer
+        evidenceId:
+          type: integer
+        action:
+          type: string
+        actor:
+          type: string
+        notes:
+          type: ["string", "null"]
+        timestamp:
+          type: string
+
+    ReportInput:
+      type: object
+      required: [format]
+      properties:
+        format:
+          type: string
+          enum: [json, html]
+        title:
+          type: string
+        includeTimeline:
+          type: boolean
+        includeFindings:
+          type: boolean
+        includeHashes:
+          type: boolean
+        includeCustody:
+          type: boolean
+
+    Report:
+      type: object
+      required: [caseId, format, generatedAt, content]
+      properties:
+        caseId:
+          type: integer
+        format:
+          type: string
+        generatedAt:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+
+    YaraScanInput:
+      type: object
+      required: [evidenceId]
+      properties:
+        evidenceId:
+          type: integer
+        rules:
+          type: string
+          description: Custom YARA-like pattern rules (one per line, regex patterns)
+        useBuiltinRules:
+          type: boolean
+
+    YaraScanResult:
+      type: object
+      required: [evidenceId, matches, scannedAt]
+      properties:
+        evidenceId:
+          type: integer
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/YaraMatch"
+        scannedAt:
+          type: string
+        rulesUsed:
+          type: integer
+
+    YaraMatch:
+      type: object
+      required: [ruleName, description, matchedStrings, severity]
+      properties:
+        ruleName:
+          type: string
+        description:
+          type: string
+        matchedStrings:
+          type: array
+          items:
+            type: string
+        severity:
+          type: string
+          enum: [info, low, medium, high, critical]
+
+    SearchResults:
+      type: object
+      required: [query, totalResults, cases, evidence, findings]
+      properties:
+        query:
+          type: string
+        totalResults:
+          type: integer
+        cases:
+          type: array
+          items:
+            $ref: "#/components/schemas/Case"
+        evidence:
+          type: array
+          items:
+            $ref: "#/components/schemas/Evidence"
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Finding"

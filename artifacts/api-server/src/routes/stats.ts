@@ -1,15 +1,34 @@
 import { Router, type IRouter } from "express";
-import { sql, eq } from "drizzle-orm";
+import { sql } from "drizzle-orm";
+
 import { db, casesTable, evidenceTable, findingsTable, timelineEventsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
 router.get("/stats", async (_req, res): Promise<void> => {
+  const databaseUnavailableFallback = {
+    totalCases: 0,
+
+    activeCases: 0,
+    totalEvidence: 0,
+    analyzedEvidence: 0,
+    recentActivity: [],
+    evidenceByType: [],
+    casesByStatus: [],
+  };
+
+  if (!db) {
+    res.json(databaseUnavailableFallback);
+    return;
+  }
+
   const [caseStats] = await db
     .select({
-      total: sql<number>`count(*)::int`,
+    total: sql<number>`count(*)::int`,
       active: sql<number>`count(*) filter (where status in ('open', 'active'))::int`,
     })
+
+
     .from(casesTable);
 
   const [evidenceStats] = await db
@@ -17,6 +36,7 @@ router.get("/stats", async (_req, res): Promise<void> => {
       total: sql<number>`count(*)::int`,
       analyzed: sql<number>`count(*) filter (where analysis_status = 'complete')::int`,
     })
+
     .from(evidenceTable);
 
   const recentEvidence = await db
